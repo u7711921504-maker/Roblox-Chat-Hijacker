@@ -1,0 +1,27 @@
+-- Lua Code for making the bubble work
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Chat = game:GetService("Chat") 
+
+-- Create the RemoteEvent if it doesn't exist
+local adminEvent = ReplicatedStorage:FindFirstChild("AdminAction") or Instance.new("RemoteEvent", ReplicatedStorage)
+adminEvent.Name = "AdminAction"
+
+adminEvent.OnServerEvent:Connect(function(player, action, data)
+	-- SECURITY
+	if player.Name ~= "LolDayLand" then return end
+
+	if action == "Hijack" then
+		local target = game.Players:FindFirstChild(data.Target)
+		if target and target.Character and target.Character:FindFirstChild("Head") then
+
+			-- 1. TRIGGER THE BUBBLE (Over their head)
+			Chat:Chat(target.Character.Head, data.Message, Enum.ChatColor.White)
+
+			-- 2. TRIGGER THE CHAT BOX (For everyone)
+			adminEvent:FireAllClients("ShowFakeMessage", {
+				Name = target.DisplayName,
+				Message = data.Message
+			})
+		end
+	end
+end)
