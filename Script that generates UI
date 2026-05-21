@@ -1,0 +1,68 @@
+-- Make UI
+local player = game.Players.LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TextChatService = game:GetService("TextChatService")
+
+-- Only shows the UI for you
+if player.Name ~= "YOURID" then script:Destroy() return end
+
+local adminEvent = ReplicatedStorage:WaitForChild("AdminAction")
+
+-- [UI CONSTRUCTION]
+local sg = Instance.new("ScreenGui", player.PlayerGui)
+sg.Name = "LolDayLand_Troll_V3"
+sg.ResetOnSpawn = false
+
+local frame = Instance.new("Frame", sg)
+frame.Size = UDim2.new(0, 220, 0, 220)
+frame.Position = UDim2.new(0, 10, 0.5, 0)
+frame.AnchorPoint = Vector2.new(0, 0.5)
+frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+frame.BackgroundTransparency = 0.4
+Instance.new("UICorner", frame)
+
+local targetInput = Instance.new("TextBox", frame)
+targetInput.Size = UDim2.new(0.9, 0, 0, 40)
+targetInput.Position = UDim2.new(0.05, 0, 0.2, 0)
+targetInput.PlaceholderText = "Target Name"
+targetInput.Text = ""
+
+local msgInput = Instance.new("TextBox", frame)
+msgInput.Size = UDim2.new(0.9, 0, 0, 40)
+msgInput.Position = UDim2.new(0.05, 0, 0.45, 0)
+msgInput.PlaceholderText = "Say what?..."
+msgInput.Text = ""
+
+local goBtn = Instance.new("TextButton", frame)
+goBtn.Size = UDim2.new(0.9, 0, 0, 40)
+goBtn.Position = UDim2.new(0.05, 0, 0.75, 0)
+goBtn.Text = "FORCE HIJACK"
+goBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+goBtn.TextColor3 = Color3.new(1, 1, 1)
+goBtn.Font = Enum.Font.GothamBold
+Instance.new("UICorner", goBtn)
+
+-- Send command to server
+goBtn.MouseButton1Click:Connect(function()
+	if targetInput.Text ~= "" and msgInput.Text ~= "" then
+		adminEvent:FireServer("Hijack", {Target = targetInput.Text, Message = msgInput.Text})
+	end
+end)
+
+-- Display the fake message in the Chat Window
+adminEvent.OnClientEvent:Connect(function(action, data)
+	if action == "ShowFakeMessage" then
+		local channels = TextChatService:WaitForChild("TextChannels", 5)
+		local general = channels and channels:FindFirstChild("RBXGeneral")
+
+		if general then
+			-- Format: Name: Message (No brackets)
+			local fakeMessage = string.format(
+				"<font color='#FFFFFF'>%s: </font><font color='#FFFFFF'>%s</font>",
+				data.Name, 
+				data.Message
+			)
+			general:DisplaySystemMessage(fakeMessage)
+		end
+	end
+end)
